@@ -1,6 +1,50 @@
 
+import os
+import logging
+from telegram import Update
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    MessageHandler,
+    ContextTypes,
+    filters,
+)
+
+logging.basicConfig(level=logging.INFO)
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "سلام! 🌸\n"
+        "ربات حسابداری زعفران آماده است.\n\n"
+        "برای شروع، یک پیام متنی یا ویس بفرست."
+    )
+
+
+async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "پیامت دریافت شد؛ ثبت حسابداری و دسته‌بندی آن در مرحله بعد اضافه می‌شود."
+    )
+
+
+async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "ویست دریافت شد 🎤\n"
+        "هنوز قابلیت تبدیل صدا به متن و ثبت حسابداری فعال نشده است."
+    )
+
+
 def main():
-    print("Saffron Accounting Bot")
+    if not TOKEN:
+        raise RuntimeError("TELEGRAM_BOT_TOKEN تنظیم نشده است.")
+
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
+    app.add_handler(MessageHandler(filters.VOICE, handle_voice))
+    app.run_polling()
+
 
 if __name__ == "__main__":
     main()
